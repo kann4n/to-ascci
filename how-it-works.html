@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How It Works - ASCII Converter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        nav {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        nav a {
+            color: #333;
+            text-decoration: none;
+            padding: 8px 15px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+
+        nav a:hover {
+            background: #f0f0f0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .step {
+            margin-bottom: 50px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .step:last-child {
+            border-bottom: none;
+        }
+
+        .step h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .step p {
+            margin-bottom: 20px;
+            color: #666;
+        }
+
+        .demo-box {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .pixel-demo {
+            display: grid;
+            grid-template-columns: repeat(8, 40px);
+            gap: 10px;
+            margin: 20px auto;
+            width: fit-content;
+        }
+
+        .pixel {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            transition: all 0.3s;
+        }
+
+        .brightness-demo {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .brightness-bar {
+            flex: 1;
+            min-width: 200px;
+            height: 60px;
+            background: linear-gradient(to right, #000, #fff);
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .brightness-indicator {
+            position: absolute;
+            top: -30px;
+            width: 2px;
+            height: 120px;
+            background: red;
+            animation: slide 3s infinite;
+        }
+
+        @keyframes slide {
+
+            0%,
+            100% {
+                left: 0;
+            }
+
+            50% {
+                left: calc(100% - 2px);
+            }
+        }
+
+        .char-set {
+            font-family: monospace;
+            font-size: 24px;
+            letter-spacing: 2px;
+            background: #000;
+            color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .before-after {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .before-after>div {
+            text-align: center;
+        }
+
+        .before-after h3 {
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .image-placeholder {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 48px;
+        }
+
+        .ascii-result {
+            width: 100%;
+            min-height: 200px;
+            background: #000;
+            color: #0f0;
+            font-family: monospace;
+            font-size: 8px;
+            line-height: 1;
+            padding: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            white-space: pre;
+        }
+
+        .animation-demo {
+            background: #000;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .rotating-char {
+            font-family: monospace;
+            font-size: 48px;
+            color: #0f0;
+            display: inline-block;
+            animation: rotate-chars 2s infinite;
+        }
+
+        @keyframes rotate-chars {
+            0% {
+                content: '@';
+            }
+
+            20% {
+                content: '#';
+            }
+
+            40% {
+                content: '*';
+            }
+
+            60% {
+                content: '+';
+            }
+
+            80% {
+                content: '.';
+            }
+
+            100% {
+                content: '@';
+            }
+        }
+
+        .color-demo {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .color-sample {
+            width: 60px;
+            height: 60px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: monospace;
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+        .process-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .process-step {
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            border: 2px solid #ddd;
+        }
+
+        .arrow {
+            font-size: 24px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .before-after {
+                grid-template-columns: 1fr;
+            }
+
+            .pixel-demo {
+                grid-template-columns: repeat(4, 40px);
+            }
+
+            .arrow {
+                transform: rotate(90deg);
+            }
+        }
+
+        .interactive-demo {
+            margin: 20px 0;
+        }
+
+        .slider-demo {
+            margin: 20px 0;
+        }
+
+        .slider-demo input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .live-char {
+            font-family: monospace;
+            font-size: 72px;
+            text-align: center;
+            padding: 20px;
+            background: #000;
+            color: #fff;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+         .footer {
+            /* Adjusted margin */
+            padding: 10px;
+            background-color: #111;
+            color: #ccc;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .footer a {
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>How It Works</h1>
+    <nav>
+        <a href="index.html">← Back to Converter</a>
+    </nav>
+
+    <div class="container">
+        <div class="step">
+            <h2>Step 1: Understanding Pixels</h2>
+            <p>Every digital image is made up of tiny colored squares called <strong>pixels</strong>. Each pixel has a
+                color made from mixing Red, Green, and Blue light (RGB).</p>
+
+            <div class="demo-box">
+                <h3 style="margin-bottom: 15px;">Image Pixels (Zoom In)</h3>
+                <div class="pixel-demo" id="pixel-grid"></div>
+                <p style="text-align: center; color: #666; font-size: 14px;">These 64 pixels could be a tiny part of a
+                    photo</p>
+            </div>
+        </div>
+
+        <div class="step">
+            <h2>Step 2: Measuring Brightness</h2>
+            <p>Each pixel has a <strong>brightness level</strong> from 0 (black) to 255 (white). We calculate this by
+                looking at how much red, green, and blue light it has.</p>
+
+            <div class="demo-box">
+                <h3 style="margin-bottom: 15px;">Brightness Scale</h3>
+                <div class="brightness-bar">
+                    <div class="brightness-indicator"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 14px;">
+                    <span>0 (Dark)</span>
+                    <span>128 (Medium)</span>
+                    <span>255 (Bright)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <h2>Step 3: Choosing Characters</h2>
+            <p>Different characters look darker or lighter when printed. We use <strong>dark characters</strong> for
+                dark pixels and <strong>light characters</strong> for bright pixels.</p>
+
+            <div class="demo-box">
+                <div class="char-set">
+                    @ # * + = - : .
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 14px;">
+                    <span>← Darker</span>
+                    <span>Lighter →</span>
+                </div>
+            </div>
+
+            <div class="interactive-demo">
+                <div class="slider-demo">
+                    <p><strong>Try it:</strong> Move the slider to see which character matches different brightness
+                        levels</p>
+                    <input type="range" id="brightness-slider" min="0" max="255" value="128">
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666;">
+                        <span>Dark (0)</span>
+                        <span>Brightness: <span id="brightness-value">128</span></span>
+                        <span>Bright (255)</span>
+                    </div>
+                    <div class="live-char" id="live-char">+</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <h2>Step 4: Converting Pixel by Pixel</h2>
+            <p>We go through each pixel, check its brightness, and replace it with the matching character. This happens
+                for every single pixel in the image!</p>
+
+            <div class="demo-box">
+                <div class="process-flow">
+                    <div class="process-step">
+                        <div style="font-size: 24px; margin-bottom: 5px;">🖼️</div>
+                        <strong>Image Pixel</strong>
+                        <div style="margin-top: 5px; font-size: 12px; color: #666;">RGB: 50,50,50</div>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="process-step">
+                        <div style="font-size: 24px; margin-bottom: 5px;">📊</div>
+                        <strong>Calculate</strong>
+                        <div style="margin-top: 5px; font-size: 12px; color: #666;">Brightness: 50</div>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="process-step">
+                        <div style="font-size: 24px; margin-bottom: 5px;">@</div>
+                        <strong>Choose Char</strong>
+                        <div style="margin-top: 5px; font-size: 12px; color: #666;">Dark = @</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <h2>Step 5: Adding Color (Optional)</h2>
+            <p>We can also keep the original colors! Each character gets colored with the same RGB values as its
+                original pixel.</p>
+
+            <div class="demo-box">
+                <div class="color-demo">
+                    <div class="color-sample" style="background: rgb(255,0,0); color: rgb(255,0,0);">@</div>
+                    <div class="color-sample" style="background: rgb(0,255,0); color: rgb(0,255,0);">#</div>
+                    <div class="color-sample" style="background: rgb(0,0,255); color: rgb(0,0,255);">*</div>
+                    <div class="color-sample" style="background: rgb(255,255,0); color: rgb(255,255,0);">+</div>
+                    <div class="color-sample" style="background: rgb(255,0,255); color: rgb(255,0,255);">=</div>
+                </div>
+                <p style="font-size: 14px; color: #666;">Same characters, different colors!</p>
+            </div>
+        </div>
+
+        <div class="step">
+            <h2>Step 6: The Final Result</h2>
+            <p>When we put all the characters together in rows and columns, they form an ASCII art version of the
+                original image!</p>
+
+            <div class="before-after">
+                <div>
+                    <h3>Original Image</h3>
+                    <div class="image-placeholder">😊</div>
+                </div>
+                <div>
+                    <h3>ASCII Art</h3>
+                    <div class="ascii-result" id="ascii-demo"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <h2>Live Camera Mode</h2>
+            <p>In live mode, we do all these steps <strong>30-60 times per second</strong> to convert video frames in
+                real-time! Your device processes each frame instantly to create moving ASCII art.</p>
+
+            <div class="demo-box">
+                <div class="animation-demo">
+                    <p style="color: #0f0; margin-bottom: 10px;">Processing frames...</p>
+                    <div class="rotating-char" id="rotating-char">@</div>
+                    <p style="color: #0f0; margin-top: 10px; font-size: 12px;">Characters update in real-time</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Created by <a href="https://github.com/kann4n">kann4n</a></p>
+        <p>inspired by <a href="https://github.com/Izz4c/BugBusters">PixCli</a></p>
+    </div>
+
+    <script>
+        // Pixel grid animation
+        const pixelGrid = document.getElementById('pixel-grid');
+        const colors = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A',
+            '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'
+        ];
+
+        for (let i = 0; i < 64; i++) {
+            const pixel = document.createElement('div');
+            pixel.className = 'pixel';
+            pixel.style.background = colors[Math.floor(Math.random() * colors.length)];
+
+            // Add RGB values
+            const rgb = pixel.style.background.match(/\d+/g);
+            if (rgb) {
+                pixel.textContent = `${rgb[0]},${rgb[1]},${rgb[2]}`;
+            }
+
+            pixelGrid.appendChild(pixel);
+
+            // Animate on hover
+            pixel.addEventListener('mouseenter', () => {
+                pixel.style.transform = 'scale(1.1)';
+                pixel.style.zIndex = '10';
+            });
+
+            pixel.addEventListener('mouseleave', () => {
+                pixel.style.transform = 'scale(1)';
+                pixel.style.zIndex = '1';
+            });
+        }
+
+        // Brightness slider demo
+        const brightnessSlider = document.getElementById('brightness-slider');
+        const brightnessValue = document.getElementById('brightness-value');
+        const liveChar = document.getElementById('live-char');
+
+        const chars = "$@B%8&WM#*oahkbdpqwmZ0QLCJUYXzcvunxrjft/|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
+
+        brightnessSlider.addEventListener('input', (e) => {
+            const value = e.target.value;
+            brightnessValue.textContent = value;
+
+            // Map brightness to character
+            const charIndex = Math.floor((value / 255) * (chars.length - 1));
+            liveChar.textContent = chars[charIndex];
+
+            // Change background brightness
+            const bgBrightness = Math.floor((value / 255) * 100);
+            liveChar.style.background = `hsl(0, 0%, ${100 - bgBrightness}%)`;
+            liveChar.style.color = `hsl(0, 0%, ${bgBrightness}%)`;
+        });
+
+        // ASCII demo animation
+        const asciiDemo = document.getElementById('ascii-demo');
+        const smileyAscii = `    @@@@@@@@@    
+  @@@@@@@@@@@@@  
+ @@@@@@@@@@@@@@@@ 
+@@@@@@@@@@@@@@@@@@
+@@  @@@@@@@  @@ @@
+@@  @@@@@@@  @@ @@
+@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@
+@@  @@@@@@@@@@  @@
+ @@  @@@@@@@@  @@ 
+  @@@  @@@@  @@@  
+    @@@@@@@@@@@   `;
+
+        let charIndex = 0;
+        function typeASCII() {
+            if (charIndex < smileyAscii.length) {
+                asciiDemo.textContent = smileyAscii.substring(0, charIndex + 1);
+                charIndex++;
+                setTimeout(typeASCII, 20);
+            }
+        }
+
+        // Start typing after a short delay
+        setTimeout(typeASCII, 500);
+
+        // Rotating character animation
+        const rotatingChar = document.getElementById('rotating-char');
+        const rotatingChars = ['@', '#', '*', '+', '=', '-', ':', '.'];
+        let currentChar = 0;
+
+        setInterval(() => {
+            currentChar = (currentChar + 1) % rotatingChars.length;
+            rotatingChar.textContent = rotatingChars[currentChar];
+        }, 300);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To ASCII</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        nav {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        nav a {
+            color: #333;
+            text-decoration: none;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .input-area, .camera-area {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .input-area label, .camera-area label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        input[type="file"] {
+            display: block;
+            margin-bottom: 10px;
+            padding: 5px;
+        }
+
+        #img-preview, #camera-preview {
+            margin-top: 10px;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #img-preview img {
+            max-width: 80px !important;
+        }
+
+        video {
+            max-width: 100%;
+            max-height: 300px;
+            border: 1px solid #ddd;
+        }
+
+        .camera-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .camera-controls button {
+            padding: 8px 15px;
+            border: 1px solid #333;
+            background: white;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .camera-controls button:hover:not(:disabled) {
+            background: #f0f0f0;
+        }
+
+        .camera-controls button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .controls {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .controls > div {
+            margin-bottom: 15px;
+        }
+
+        .controls > div:last-child {
+            margin-bottom: 0;
+        }
+
+        .controls label {
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        input[type="range"] {
+            width: 200px;
+            vertical-align: middle;
+        }
+
+        select {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+
+        input[type="checkbox"] {
+            vertical-align: middle;
+        }
+
+        .output-area {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .output-area label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        #out {
+            background: #000;
+            padding: 15px;
+            border-radius: 3px;
+            overflow: auto;
+            max-height: 600px;
+        }
+
+        #pre-out {
+            margin: 0;
+            line-height: 1;
+            font-size: 10px;
+            font-family: monospace;
+            white-space: pre;
+            color: #fff;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+        }
+
+        .footer a {
+            color: #666;
+        }
+
+        .live-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #00ff00;
+            border-radius: 50%;
+            margin-left: 5px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body>
+    <h1>To Ascci</h1>
+    <nav>
+        <ul>
+            <li><a href="https://github.com/kann4n/to-ascii">Github</a></li>
+            <li><a href="index.html">old version</a></li>
+            <li><a href="how-it-works.html">How it works</a></li>
+        </ul>
+    </nav>
+    
+    <div class="container">
+        <div class="input-area">
+            <label for="file-input">Input</label>
+            <input type="file" name="upload" id="file-input" accept="image/*" capture="environment">
+            <div id="img-preview"></div>
+        </div>
+
+        <div class="camera-area">
+            <label>Camera Input</label>
+            <div id="camera-preview">
+                <video id="video" autoplay playsinline style="display:none;"></video>
+            </div>
+            <div class="camera-controls">
+                <button id="start-camera">Start Camera</button>
+                <button id="capture" disabled>Capture</button>
+                <button id="stop-camera" disabled>Stop</button>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div>
+                <label for="width">Width :</label>
+                <span id="width-value">100</span>
+                <input type="range" name="width" id="width" value="100" min="50" max="200">
+            </div>
+            <div>
+                <label for="charset">charset</label>
+                <select name="charset" id="charset">
+                    <option value="standard">standard</option>
+                    <option value="detailed">detailed</option>
+                    <option value="simple">simple</option>
+                    <option value="blocks">blocks</option>
+                </select>
+            </div>
+            <div>
+                <label for="invert">invert</label>
+                <input type="checkbox" name="invert" id="invert">
+            </div>
+            <div>
+                <label for="color">Color</label>
+                <input type="checkbox" name="color" id="color" checked>
+            </div>
+            <div>
+                <label for="live-mode">Live Mode</label>
+                <input type="checkbox" name="live-mode" id="live-mode" disabled>
+                <span class="live-indicator" style="display:none;" id="live-indicator"></span>
+            </div>
+        </div>
+
+        <div class="output-area">
+            <label for="output">Output</label>
+            <div id="out">
+                <pre id="pre-out"></pre>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>Created by <a href="https://github.com/kann4n">kann4n</a></p>
+        <p>inspired by <a href="https://github.com/Izz4c/BugBusters">PixCli</a></p>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const preOut = document.getElementById('pre-out');
+        const imgPreview = document.getElementById('img-preview');
+        const widthInput = document.getElementById('width');
+        const colorCheckbox = document.getElementById('color');
+        const invertCheckbox = document.getElementById('invert');
+        const charsetSelect = document.getElementById('charset');
+        const widthValue = document.getElementById('width-value');
+        
+        const video = document.getElementById('video');
+        const startCameraBtn = document.getElementById('start-camera');
+        const stopCameraBtn = document.getElementById('stop-camera');
+        const captureBtn = document.getElementById('capture');
+        const liveModeCheckbox = document.getElementById('live-mode');
+        const liveIndicator = document.getElementById('live-indicator');
+        
+        let originalImage = null;
+        let stream = null;
+        let liveMode = false;
+        let animationId = null;
+
+        const charsets = {
+            standard: "$@B%8&WM#*oahkbdpqwmZ0QLCJUYXzcvunxrjft/|()1{}[]?-_+~<>i!lI;:,\"^`'. ",
+            detailed: "@%#*+=-:. ",
+            simple: "@#+=:. ",
+            blocks: "█▓▒░ "
+        };
+
+        function calculate_luminance(r, g, b) {
+            const avg = 0.2 * r + 0.6 * g + 0.2 * b;
+            return avg;
+        }
+
+        function generateASCII(img, targetWidth, isColor, isInverted, charset) {
+            let asciiChars = charsets[charset];
+            
+            if (isInverted) {
+                asciiChars = asciiChars.split("").reverse().join("");
+            }
+
+            if (!img) return "";
+
+            const width = targetWidth;
+            const scale = width / (img.naturalWidth || img.videoWidth || img.width);
+            const height = Math.floor((img.naturalHeight || img.videoHeight || img.height) * scale * 0.55);
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = width;
+            canvas.height = height;
+
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            const imgD = ctx.getImageData(0, 0, width, height);
+
+            let ascci = "";
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const pixelIndex = (y * width + x) * 4;
+                    const r = imgD.data[pixelIndex + 0];
+                    const g = imgD.data[pixelIndex + 1];
+                    const b = imgD.data[pixelIndex + 2];
+                    
+                    const luminance = calculate_luminance(r, g, b);
+                    const charIndex = Math.floor((luminance / 255) * (asciiChars.length - 1));
+                    const char = asciiChars.charAt(charIndex);
+
+                    if (isColor) {
+                        ascci += `<span style="color: rgb(${r},${g},${b});">${char}</span>`;
+                    } else {
+                        ascci += char;
+                    }
+                }
+                ascci += '\n';
+            }
+            
+            return ascci;
+        }
+
+        const updateASCII = () => {
+            if (originalImage) {
+                const out = generateASCII(
+                    originalImage, 
+                    parseInt(widthInput.value), 
+                    colorCheckbox.checked, 
+                    invertCheckbox.checked,
+                    charsetSelect.value
+                );
+                preOut.innerHTML = out;
+                widthValue.innerHTML = widthInput.value;
+            }
+        };
+
+        function processVideoFrame() {
+            if (liveMode && video.videoWidth > 0) {
+                const out = generateASCII(
+                    video,
+                    parseInt(widthInput.value),
+                    colorCheckbox.checked,
+                    invertCheckbox.checked,
+                    charsetSelect.value
+                );
+                preOut.innerHTML = out;
+                widthValue.innerHTML = widthInput.value;
+                animationId = requestAnimationFrame(processVideoFrame);
+            }
+        }
+
+        widthInput.addEventListener('input', () => {
+            if (liveMode) return;
+            updateASCII();
+        });
+        
+        colorCheckbox.addEventListener('change', () => {
+            if (liveMode) return;
+            updateASCII();
+        });
+        
+        invertCheckbox.addEventListener('change', () => {
+            if (liveMode) return;
+            updateASCII();
+        });
+        
+        charsetSelect.addEventListener('change', () => {
+            if (liveMode) return;
+            updateASCII();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            e.preventDefault();
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const img = document.createElement('img');
+                    img.src = ev.target.result;
+                    img.onload = () => {
+                        originalImage = img;
+                        imgPreview.innerHTML = '';
+                        img.style.maxWidth = '80px';
+                        imgPreview.appendChild(img);
+                        
+                        if (liveMode) {
+                            liveModeCheckbox.checked = false;
+                            stopLiveMode();
+                        }
+                        
+                        updateASCII();
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        startCameraBtn.addEventListener('click', async () => {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' } 
+                });
+                video.srcObject = stream;
+                video.style.display = 'block';
+                
+                startCameraBtn.disabled = true;
+                stopCameraBtn.disabled = false;
+                captureBtn.disabled = false;
+                liveModeCheckbox.disabled = false;
+            } catch (err) {
+                alert('Error accessing camera: ' + err.message);
+            }
+        });
+
+        stopCameraBtn.addEventListener('click', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+                video.style.display = 'none';
+                
+                startCameraBtn.disabled = false;
+                stopCameraBtn.disabled = true;
+                captureBtn.disabled = true;
+                liveModeCheckbox.disabled = true;
+                
+                if (liveMode) {
+                    liveModeCheckbox.checked = false;
+                    stopLiveMode();
+                }
+            }
+        });
+
+        captureBtn.addEventListener('click', () => {
+            if (video.videoWidth > 0) {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0);
+                
+                const img = new Image();
+                img.src = canvas.toDataURL();
+                img.onload = () => {
+                    originalImage = img;
+                    imgPreview.innerHTML = '';
+                    img.style.maxWidth = '80px';
+                    imgPreview.appendChild(img);
+                    
+                    if (liveMode) {
+                        liveModeCheckbox.checked = false;
+                        stopLiveMode();
+                    }
+                    
+                    updateASCII();
+                };
+            }
+        });
+
+        liveModeCheckbox.addEventListener('change', () => {
+            if (liveModeCheckbox.checked) {
+                startLiveMode();
+            } else {
+                stopLiveMode();
+            }
+        });
+
+        function startLiveMode() {
+            if (video.videoWidth > 0) {
+                liveMode = true;
+                liveIndicator.style.display = 'inline-block';
+                processVideoFrame();
+            } else {
+                liveModeCheckbox.checked = false;
+                alert('Please start the camera first!');
+            }
+        }
+
+        function stopLiveMode() {
+            liveMode = false;
+            liveIndicator.style.display = 'none';
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+        }
+
+        updateASCII();
+    </script>
+</body>
+</html>

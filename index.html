@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>To ASCII</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* New: Container to center content on wide screens */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 10px;
+            /* Add padding for small screens */
+        }
+
+        /* Updated: Apply responsiveness to content areas */
+        .input-area,
+        .controls,
+        .output-area {
+            margin: 20px 0;
+            /* Adjusted margin to rely on container padding */
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            /* Slightly larger border-radius for modern look */
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            /* Key for responsiveness: wraps items onto the next line */
+            gap: 15px;
+            /* Spacing between control divs */
+        }
+
+        .controls>div {
+            /* Makes each control item flexible and take up space */
+            flex: 1 1 auto;
+            min-width: 200px;
+            /* Ensures control items are not too narrow */
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #out {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #111;
+            color: #eee;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            height: 300px;
+            overflow: auto;
+        }
+
+        #pre-out {
+            /* Ensure <pre> takes up the full space of #out */
+            margin: 0;
+            padding: 0;
+            color: #fff;
+            height: 100%;
+            font-family: monospace;
+            /* Essential for ASCII art */
+            white-space: pre;
+            /* Essential for ASCII art */
+        }
+
+        ul {
+            display: flex;
+            justify-content: space-around;
+            list-style: none;
+            background: #eee;
+            margin: 20px 0;
+            /* Adjusted margin */
+            padding: 10px 5px;
+            border-radius: 5px;
+        }
+
+        a {
+            text-decoration: none;
+            color: #333;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            margin: 20px 0;
+            /* Adjusted margin */
+            padding: 10px;
+            background-color: #111;
+            color: #ccc;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        p {
+            font-size: 12px;
+        }
+
+        p a {
+            color: #abc;
+        }
+
+        #width {
+            flex-grow: 1;
+            /* Allows the range input to take available space */
+            height: 4px;
+        }
+
+        #color {
+            height: 20px;
+            width: 20px;
+            border-radius: 5px;
+        }
+
+        #img-preview img {
+            max-width: 100%;
+            /* Ensures the image doesn't overflow its container */
+            height: auto;
+            display: block;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>To Ascci</h1>
+    <nav>
+        <ul>
+            <li><a href="https://github.com/kann4n/to-ascii">Github</a></li>
+            <li><a href="v2.html">new version</a></li>
+            <li><a href="how-it-works.html">How it works</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <div class="input-area">
+            <label for="file-input">Input </label>
+            <input type="file" name="upload" id="file-input" accept="image/*" capture="environment">
+            <div id="img-preview"></div>
+        </div>
+        <div class="controls">
+            <div>
+                <label for="width">Width :</label>
+                <span id="width-value">100</span>
+                <input type="range" name="width" id="width" value="100" min="50" max="200">
+            </div>
+            <div>
+                <label for="charset">charset</label>
+                <select name="" id=""></select>
+            </div>
+            <div>
+                <label for="invert">invert</label>
+                <input type="checkbox" name="invert" id="invert">
+            </div>
+            <div>
+                <label for="color">Color </label>
+                <input type="checkbox" name="color" id="color" checked>
+            </div>
+
+        </div>
+        <div class="output-area">
+            <label for="output">Output </label>
+            <div id="out">
+                <pre id="pre-out"></pre>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <p>Created by <a href="https://github.com/kann4n">kann4n</a></p>
+        <p>inspired by <a href="https://github.com/Izz4c/BugBusters">PixCli</a></p>
+    </div>
+    <script>
+        // ... (The JavaScript from the previous response remains the same)
+        const fileInput = document.getElementById('file-input')
+        const preOut = document.getElementById('pre-out')
+        const imgPreview = document.getElementById('img-preview')
+        const widthInput = document.getElementById('width')
+        const colorCheckbox = document.getElementById('color')
+        const invertCheckbox = document.getElementById('invert')
+        let originalImage = null;
+
+        const widthValue = document.getElementById('width-value')
+
+        // Event listener for width slider and color checkbox
+        const updateASCII = () => {
+            if (originalImage) {
+                // The `invertCheckbox.checked` flag is passed to handle the invert feature
+                const out = generateASCII(originalImage, parseInt(widthInput.value), colorCheckbox.checked, invertCheckbox.checked)
+                preOut.innerHTML = out
+                widthValue.innerHTML = widthInput.value
+            }
+        }
+
+        widthInput.addEventListener('input', updateASCII)
+        colorCheckbox.addEventListener('change', updateASCII)
+        invertCheckbox.addEventListener('change', updateASCII) // Added event listener for invert checkbox
+
+
+        fileInput.addEventListener('change', (e) => {
+            e.preventDefault();
+            const file = e.target.files[0]
+            if (file) {
+                const reader = new FileReader()
+                reader.onload = (ev) => {
+                    const img = document.createElement('img')
+                    img.src = ev.target.result;
+                    img.onload = () => {
+                        originalImage = img;
+                        imgPreview.innerHTML = '';
+                        img.style.maxWidth = '80px';
+                        imgPreview.appendChild(img);
+                        updateASCII(); // Generate ASCII after a new image is loaded
+                    };
+                }
+                reader.readAsDataURL(file)
+            }
+        })
+
+        function calculate_luminance(r, g, b) {
+            // Using the original simpler formula for consistency:
+            const avg = 0.2 * r + 0.6 * g + 0.2 * b
+            return avg
+        }
+
+        function generateASCII(img, targetWidth, isColor, isInverted) {
+            // The ASCII character set, from darkest to brightest
+            let asciiChars = "$@B%8&WM#*oahkbdpqwmZ0QLCJUYXzcvunxrjft/|()1{}[]?-_+~<>i!lI;:,\"^`'.        ";
+
+            // Apply invert logic based on the flag
+            if (isInverted) {
+                asciiChars = asciiChars.split("").reverse().join("");
+            }
+
+            if (!img) return "";
+
+            const width = targetWidth;
+            const scale = width / img.naturalWidth;
+            // Aspect ratio compensation (0.55) for monospace fonts
+            const height = Math.floor(img.naturalHeight * scale * 0.55);
+
+            /** @type {HTMLCanvasElement} */
+            const canvas = document.createElement('canvas');
+            /** @type {CanvasRenderingContext2D} */
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = width;
+            canvas.height = height;
+
+            // 1. Draw the image onto the canvas, resizing it to the target dimensions
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // 2. Get the scaled pixel data
+            const imgD = ctx.getImageData(0, 0, width, height);
+
+            let ascci = "";
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const pixelIndex = (y * width + x) * 4; // RGBA data
+                    const r = imgD.data[pixelIndex + 0];
+                    const g = imgD.data[pixelIndex + 1];
+                    const b = imgD.data[pixelIndex + 2];
+
+                    const luminance = calculate_luminance(r, g, b);
+                    // Map luminance (0-255) to character index (0 to length-1)
+                    const charIndex = Math.floor((luminance / 255) * (asciiChars.length - 1));
+                    const char = asciiChars.charAt(charIndex);
+
+                    if (isColor) {
+                        // Apply color if the checkbox is checked.
+                        ascci += `<span style="color: rgb(${r},${g},${b});">${char}</span>`;
+                    } else {
+                        ascci += `<span>${char}</span>`
+                    }
+                }
+                ascci += '\n'; // Add newline after each row
+            }
+
+            return ascci;
+        }
+
+        updateASCII();
+
+    </script>
+</body>
+
+</html>
