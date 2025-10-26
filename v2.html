@@ -225,7 +225,7 @@
             <li><a href="how-it-works.html">How it works</a></li>
         </ul>
     </nav>
-    
+
     <div class="container">
         <div class="input-area">
             <label for="file-input">Input</label>
@@ -244,7 +244,7 @@
                 <button id="stop-camera" disabled>Stop</button>
             </div>
         </div>
-        
+
         <div class="controls">
             <div>
                 <label for="width">Width :</label>
@@ -284,7 +284,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="footer">
         <p>Created by <a href="https://github.com/kann4n">kann4n</a></p>
         <p>inspired by <a href="https://github.com/Izz4c/BugBusters">PixCli</a></p>
@@ -299,14 +299,14 @@
         const invertCheckbox = document.getElementById('invert');
         const charsetSelect = document.getElementById('charset');
         const widthValue = document.getElementById('width-value');
-        
+
         const video = document.getElementById('video');
         const startCameraBtn = document.getElementById('start-camera');
         const stopCameraBtn = document.getElementById('stop-camera');
         const captureBtn = document.getElementById('capture');
         const liveModeCheckbox = document.getElementById('live-mode');
         const liveIndicator = document.getElementById('live-indicator');
-        
+
         let originalImage = null;
         let stream = null;
         let liveMode = false;
@@ -371,7 +371,7 @@
             let asciiChars = (charset === 'custom') ? resolveCharset('custom') : charsets[charset];
             // Fallback to standard if unresolved
             if (!asciiChars) asciiChars = charsets.standard;
-            
+
             if (isInverted) {
                 asciiChars = asciiChars.split("").reverse().join("");
             }
@@ -389,7 +389,7 @@
             canvas.height = height;
 
             ctx.drawImage(img, 0, 0, width, height);
-            
+
             const imgD = ctx.getImageData(0, 0, width, height);
 
             let ascci = "";
@@ -399,7 +399,7 @@
                     const r = imgD.data[pixelIndex + 0];
                     const g = imgD.data[pixelIndex + 1];
                     const b = imgD.data[pixelIndex + 2];
-                    
+
                     const luminance = calculate_luminance(r, g, b);
                     const charIndex = Math.floor((luminance / 255) * (asciiChars.length - 1));
                     const char = asciiChars.charAt(charIndex);
@@ -412,16 +412,16 @@
                 }
                 ascci += '\n';
             }
-            
+
             return ascci;
         }
 
         const updateASCII = () => {
             if (originalImage) {
                 const out = generateASCII(
-                    originalImage, 
-                    parseInt(widthInput.value), 
-                    colorCheckbox.checked, 
+                    originalImage,
+                    parseInt(widthInput.value),
+                    colorCheckbox.checked,
                     invertCheckbox.checked,
                     charsetSelect.value
                 );
@@ -449,17 +449,17 @@
             if (liveMode) return;
             updateASCII();
         });
-        
+
         colorCheckbox.addEventListener('change', () => {
             if (liveMode) return;
             updateASCII();
         });
-        
+
         invertCheckbox.addEventListener('change', () => {
             if (liveMode) return;
             updateASCII();
         });
-        
+
         charsetSelect.addEventListener('change', () => {
             if (liveMode) return;
             if (charsetSelect.value === 'custom') {
@@ -483,12 +483,12 @@
                         imgPreview.innerHTML = '';
                         img.style.maxWidth = '80px';
                         imgPreview.appendChild(img);
-                        
+
                         if (liveMode) {
                             liveModeCheckbox.checked = false;
                             stopLiveMode();
                         }
-                        
+
                         updateASCII();
                     };
                 };
@@ -498,12 +498,12 @@
 
         startCameraBtn.addEventListener('click', async () => {
             try {
-                stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: 'environment' } 
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' }
                 });
                 video.srcObject = stream;
                 video.style.display = 'block';
-                
+
                 startCameraBtn.disabled = true;
                 stopCameraBtn.disabled = false;
                 captureBtn.disabled = false;
@@ -518,12 +518,12 @@
                 stream.getTracks().forEach(track => track.stop());
                 video.srcObject = null;
                 video.style.display = 'none';
-                
+
                 startCameraBtn.disabled = false;
                 stopCameraBtn.disabled = true;
                 captureBtn.disabled = true;
                 liveModeCheckbox.disabled = true;
-                
+
                 if (liveMode) {
                     liveModeCheckbox.checked = false;
                     stopLiveMode();
@@ -538,7 +538,7 @@
                 canvas.height = video.videoHeight;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(video, 0, 0);
-                
+
                 const img = new Image();
                 img.src = canvas.toDataURL();
                 img.onload = () => {
@@ -546,12 +546,12 @@
                     imgPreview.innerHTML = '';
                     img.style.maxWidth = '80px';
                     imgPreview.appendChild(img);
-                    
+
                     if (liveMode) {
                         liveModeCheckbox.checked = false;
                         stopLiveMode();
                     }
-                    
+
                     updateASCII();
                 };
             }
