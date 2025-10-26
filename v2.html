@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -49,17 +50,19 @@
             background: white;
             padding: 20px;
             border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        .input-area, .camera-area {
+        .input-area,
+        .camera-area {
             border: 1px solid #ddd;
             padding: 15px;
             margin-bottom: 20px;
             border-radius: 5px;
         }
 
-        .input-area label, .camera-area label {
+        .input-area label,
+        .camera-area label {
             display: block;
             margin-bottom: 10px;
             font-weight: bold;
@@ -71,7 +74,8 @@
             padding: 5px;
         }
 
-        #img-preview, #camera-preview {
+        #img-preview,
+        #camera-preview {
             margin-top: 10px;
             min-height: 100px;
             display: flex;
@@ -119,11 +123,11 @@
             border-radius: 5px;
         }
 
-        .controls > div {
+        .controls>div {
             margin-bottom: 15px;
         }
 
-        .controls > div:last-child {
+        .controls>div:last-child {
             margin-bottom: 0;
         }
 
@@ -197,11 +201,21 @@
         }
 
         @keyframes blink {
-            0%, 50%, 100% { opacity: 1; }
-            25%, 75% { opacity: 0.3; }
+
+            0%,
+            50%,
+            100% {
+                opacity: 1;
+            }
+
+            25%,
+            75% {
+                opacity: 0.3;
+            }
         }
     </style>
 </head>
+
 <body>
     <h1>To Ascci</h1>
     <nav>
@@ -215,7 +229,7 @@
     <div class="container">
         <div class="input-area">
             <label for="file-input">Input</label>
-            <input type="file" name="upload" id="file-input" accept="image/*" capture="environment">
+            <input type="file" name="upload" id="file-input" accept="image/*">
             <div id="img-preview"></div>
         </div>
 
@@ -244,7 +258,9 @@
                     <option value="detailed">detailed</option>
                     <option value="simple">simple</option>
                     <option value="blocks">blocks</option>
+                    <option value="custom">custom</option>
                 </select>
+                <div id="custom-charset"></div>
             </div>
             <div>
                 <label for="invert">invert</label>
@@ -303,13 +319,58 @@
             blocks: "█▓▒░ "
         };
 
+        // Custom charset handling: create a single input field (hidden unless needed),
+        // keep its value, and update ASCII output on change.
+        const customCharsetContainer = document.getElementById('custom-charset');
+        let customCharsetInput = null;
+
+        function ensureCustomInput() {
+            if (!customCharsetInput) {
+                customCharsetInput = document.createElement('input');
+                customCharsetInput.type = 'text';
+                customCharsetInput.value = charsets.standard;
+                customCharsetInput.style.width = '100%';
+                customCharsetInput.addEventListener('input', () => {
+                    if (!liveMode) updateASCII();
+                });
+                customCharsetContainer.appendChild(customCharsetInput);
+            }
+            customCharsetContainer.style.display = '';
+        }
+
+        function hideCustomInput() {
+            if (customCharsetInput) {
+                // keep the input but hide the container so value is preserved
+                customCharsetContainer.style.display = 'none';
+            } else {
+                customCharsetContainer.style.display = 'none';
+            }
+        }
+
+        function resolveCharset(name) {
+            if (name === 'custom') {
+                return (customCharsetInput && customCharsetInput.value) ? customCharsetInput.value : charsets.standard;
+            }
+            return charsets[name] || charsets.standard;
+        }
+
+        // Initialize custom input visibility based on current selection
+        if (charsetSelect.value === 'custom') {
+            ensureCustomInput();
+        } else {
+            hideCustomInput();
+        }
+
         function calculate_luminance(r, g, b) {
             const avg = 0.2 * r + 0.6 * g + 0.2 * b;
             return avg;
         }
 
         function generateASCII(img, targetWidth, isColor, isInverted, charset) {
-            let asciiChars = charsets[charset];
+            // Resolve charset (supports named charsets and 'custom')
+            let asciiChars = (charset === 'custom') ? resolveCharset('custom') : charsets[charset];
+            // Fallback to standard if unresolved
+            if (!asciiChars) asciiChars = charsets.standard;
             
             if (isInverted) {
                 asciiChars = asciiChars.split("").reverse().join("");
@@ -401,6 +462,11 @@
         
         charsetSelect.addEventListener('change', () => {
             if (liveMode) return;
+            if (charsetSelect.value === 'custom') {
+                ensureCustomInput();
+            } else {
+                hideCustomInput();
+            }
             updateASCII();
         });
 
@@ -522,4 +588,5 @@
         updateASCII();
     </script>
 </body>
+
 </html>
