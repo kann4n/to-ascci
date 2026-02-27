@@ -11,4 +11,4 @@ live demo: [https://kann4n.github.io/to-ascci/](https://kann4n.github.io/to-ascc
 ### contributions
 anyone is welcome to contribute by [forking the repository](https://github.com/kann4n/to-ascii) and submitting a [pull request](https://github.com/kann4n/to-ascii/pulls).
 
-[![Hits](https://hitcount.dev/p/kannanhacker123/to-ascii?labelColor=000000&countColor=0900ff.svg)](https://hitcount.dev/p/kannanhacker123/to-ascii?labelColor=000000&countColor=0900ff)
+
