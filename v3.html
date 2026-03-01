@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="keywords" content="ASCII art, image to text, camera to ascii, ascii converter, text art generator, edge detection">
+    <meta name="author" content="kann4n">
+    <title>To ASCII v3</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        nav {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        nav a {
+            color: #333;
+            text-decoration: none;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-area,
+        .camera-area {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .input-area label,
+        .camera-area label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        input[type="file"] {
+            display: block;
+            margin-bottom: 10px;
+            padding: 5px;
+        }
+
+        #img-preview,
+        #camera-preview {
+            margin-top: 10px;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #img-preview img {
+            max-width: 80px !important;
+        }
+
+        video {
+            max-width: 100%;
+            max-height: 300px;
+            border: 1px solid #ddd;
+        }
+
+        .camera-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .camera-controls button {
+            padding: 8px 15px;
+            border: 1px solid #333;
+            background: white;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .camera-controls button:hover:not(:disabled) {
+            background: #f0f0f0;
+        }
+
+        .camera-controls button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .controls {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            background-color: #fff;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #555;
+            text-transform: capitalize;
+        }
+
+        .control-group.row-layout {
+            flex-direction: row;
+            align-items: center;
+            gap: 12px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #fff;
+        }
+
+        #custom-charset input {
+            margin-top: 5px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .value-display {
+            font-family: monospace;
+            background: #eee;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .edge-section {
+            border: 1px solid #aad4ff;
+            background: #f0f8ff;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .edge-section .section-title {
+            grid-column: 1 / -1;
+            font-weight: bold;
+            font-size: 1rem;
+            color: #2277bb;
+            margin-bottom: 5px;
+        }
+
+        .output-area {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .output-area label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        #out {
+            background: #000;
+            padding: 15px;
+            border-radius: 3px;
+            overflow: auto;
+            max-height: 600px;
+        }
+
+        #pre-out {
+            margin: 0;
+            line-height: 1;
+            font-size: 10px;
+            font-family: monospace;
+            white-space: pre;
+            color: #fff;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+        }
+
+        .footer a {
+            color: #666;
+        }
+
+        .live-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #00ff00;
+            border-radius: 50%;
+            margin-left: 5px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.3; }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>To Ascci <small style="font-size:0.55em; color:#2277bb;">v3 — Edge Detection</small></h1>
+    <nav>
+        <ul>
+            <li><a href="https://github.com/kann4n/to-ascci">Github</a></li>
+            <li><a href="index.html">v1</a></li>
+            <li><a href="v2.html">v2</a></li>
+            <li><a href="how-it-works.html">How it works</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="input-area">
+            <label for="file-input">Input</label>
+            <input type="file" name="upload" id="file-input" accept="image/*">
+            <div id="img-preview"></div>
+        </div>
+
+        <div class="camera-area">
+            <label>Camera Input</label>
+            <div id="camera-preview">
+                <video id="video" autoplay playsinline style="display:none;"></video>
+            </div>
+            <div class="camera-controls">
+                <button id="start-camera">Start Camera</button>
+                <button id="capture" disabled>Capture</button>
+                <button id="stop-camera" disabled>Stop</button>
+            </div>
+        </div>
+
+        <!-- Edge Detection Controls -->
+        <div class="edge-section">
+            <div class="section-title">⬡ Edge Detection (v3)</div>
+
+            <div class="control-group">
+                <label>Edge Mode</label>
+                <div class="control-group row-layout">
+                    <input type="checkbox" id="edge-detect" checked>
+                    <label for="edge-detect" style="margin:0;">Enable Edge Detection</label>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label for="edge-threshold">Edge Threshold: <span id="edge-threshold-value" class="value-display">40</span></label>
+                <input type="range" id="edge-threshold" value="40" min="5" max="200">
+            </div>
+
+            <div class="control-group">
+                <label for="edge-chars">Edge Characters</label>
+                <input type="text" id="edge-chars" value="|-/\" style="padding:6px; border:1px solid #ccc; border-radius:4px; font-family:monospace; font-size:1.1em;" maxlength="20">
+                <small style="color:#777;">Characters used for edges (in order: horizontal, vertical, diagonal /, diagonal \)</small>
+            </div>
+        </div>
+
+        <!-- Standard Controls -->
+        <div class="controls">
+            <div class="control-group">
+                <label for="width">Output Width: <span id="width-value" class="value-display">100</span></label>
+                <input type="range" name="width" id="width" value="100" min="50" max="200">
+            </div>
+
+            <div class="control-group">
+                <label for="charset">Character Set</label>
+                <select name="charset" id="charset">
+                    <option value="standard">Standard</option>
+                    <option value="detailed">Detailed</option>
+                    <option value="simple">Simple</option>
+                    <option value="blocks">Blocks</option>
+                    <option value="custom">Custom...</option>
+                </select>
+                <div id="custom-charset"></div>
+            </div>
+
+            <div class="control-group">
+                <label>Options</label>
+                <div style="display: flex; gap: 20px;">
+                    <div class="control-group row-layout">
+                        <input type="checkbox" name="invert" id="invert">
+                        <label for="invert" style="margin:0;">Invert</label>
+                    </div>
+                    <div class="control-group row-layout">
+                        <input type="checkbox" name="color" id="color" checked>
+                        <label for="color" style="margin:0;">Color</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label for="live-mode">Live Feedback</label>
+                <div class="control-group row-layout">
+                    <input type="checkbox" name="live-mode" id="live-mode" disabled>
+                    <label for="live-mode" style="margin:0;">Enable Live Mode</label>
+                    <span class="live-indicator" style="display:none;" id="live-indicator"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="output-area">
+            <label for="output">Output</label>
+            <div id="out">
+                <pre id="pre-out"></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Created by <a href="https://github.com/kann4n">kann4n</a></p>
+        <p>inspired by <a href="https://github.com/Izz4c/BugBusters">PixCii</a></p>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const preOut = document.getElementById('pre-out');
+        const imgPreview = document.getElementById('img-preview');
+        const widthInput = document.getElementById('width');
+        const colorCheckbox = document.getElementById('color');
+        const invertCheckbox = document.getElementById('invert');
+        const charsetSelect = document.getElementById('charset');
+        const widthValue = document.getElementById('width-value');
+
+        const edgeDetectCheckbox = document.getElementById('edge-detect');
+        const edgeThresholdInput = document.getElementById('edge-threshold');
+        const edgeThresholdValue = document.getElementById('edge-threshold-value');
+        const edgeCharsInput = document.getElementById('edge-chars');
+
+        const video = document.getElementById('video');
+        const startCameraBtn = document.getElementById('start-camera');
+        const stopCameraBtn = document.getElementById('stop-camera');
+        const captureBtn = document.getElementById('capture');
+        const liveModeCheckbox = document.getElementById('live-mode');
+        const liveIndicator = document.getElementById('live-indicator');
+
+        let originalImage = null;
+        let stream = null;
+        let liveMode = false;
+        let animationId = null;
+
+        const charsets = {
+            standard: "$@B%8&WM#*oahkbdpqwmZ0QLCJUYXzcvunxrjft/|()1{}[]?-_+~<>i!lI;:,\"^`'. ",
+            detailed: "@%#*+=-:. ",
+            simple: "@#+=:. ",
+            blocks: "█▓▒░ "
+        };
+
+        const customCharsetContainer = document.getElementById('custom-charset');
+        let customCharsetInput = null;
+
+        function ensureCustomInput() {
+            if (!customCharsetInput) {
+                customCharsetInput = document.createElement('input');
+                customCharsetInput.type = 'text';
+                customCharsetInput.value = charsets.standard;
+                customCharsetInput.style.width = '100%';
+                customCharsetInput.addEventListener('input', () => {
+                    if (!liveMode) updateASCII();
+                });
+                customCharsetContainer.appendChild(customCharsetInput);
+            }
+            customCharsetContainer.style.display = '';
+        }
+
+        function hideCustomInput() {
+            customCharsetContainer.style.display = 'none';
+        }
+
+        function resolveCharset(name) {
+            if (name === 'custom') {
+                return (customCharsetInput && customCharsetInput.value) ? customCharsetInput.value : charsets.standard;
+            }
+            return charsets[name] || charsets.standard;
+        }
+
+        if (charsetSelect.value === 'custom') {
+            ensureCustomInput();
+        } else {
+            hideCustomInput();
+        }
+
+        function calculate_luminance(r, g, b) {
+            return 0.299 * r + 0.587 * g + 0.114 * b;
+        }
+
+        /**
+         * Compute Sobel gradients from a grayscale Float32Array.
+         * Returns { gx, gy } as Float32Arrays of length width*height.
+         */
+        function computeSobel(gray, width, height) {
+            const gx = new Float32Array(width * height);
+            const gy = new Float32Array(width * height);
+
+            for (let y = 1; y < height - 1; y++) {
+                for (let x = 1; x < width - 1; x++) {
+                    const tl = gray[(y - 1) * width + (x - 1)];
+                    const tc = gray[(y - 1) * width + x];
+                    const tr = gray[(y - 1) * width + (x + 1)];
+                    const ml = gray[y * width + (x - 1)];
+                    const mr = gray[y * width + (x + 1)];
+                    const bl = gray[(y + 1) * width + (x - 1)];
+                    const bc = gray[(y + 1) * width + x];
+                    const br = gray[(y + 1) * width + (x + 1)];
+
+                    // Sobel kernels
+                    gx[y * width + x] = -tl + tr - 2 * ml + 2 * mr - bl + br;
+                    gy[y * width + x] = -tl - 2 * tc - tr + bl + 2 * bc + br;
+                }
+            }
+            return { gx, gy };
+        }
+
+        /**
+         * Map gradient direction to a sharp ASCII edge character.
+         *
+         * The Sobel gradient is perpendicular to the edge.
+         * Normalize the angle to [0°, 180°) and pick the closest edge direction:
+         *   0°  / 180°  → gradient is horizontal → edge runs vertically   → |
+         *   45°          → gradient is SE/NW       → edge runs NE-SW        → \
+         *   90°          → gradient is vertical    → edge runs horizontally → -
+         *   135°         → gradient is NE/SW       → edge runs NW-SE        → /
+         */
+        function getEdgeChar(gxVal, gyVal, edgeChars) {
+            // edgeChars is a string of 4 chars: [horiz-edge, vert-edge, diag-/, diag-\]
+            // mapped as: index 0 = |, 1 = -, 2 = /, 3 = \
+            const ch = (i) => edgeChars[i] || '|';
+
+            let deg = Math.atan2(gyVal, gxVal) * 180 / Math.PI;
+            // Collapse opposite directions: normalize to [0, 180)
+            deg = ((deg % 180) + 180) % 180;
+
+            if (deg < 22.5 || deg >= 157.5) return ch(0); // | vertical edge
+            else if (deg < 67.5) return ch(3);             // \ diagonal edge
+            else if (deg < 112.5) return ch(1);            // - horizontal edge
+            else return ch(2);                             // / diagonal edge
+        }
+
+        function generateASCII(img, targetWidth, isColor, isInverted, charset, useEdge, edgeThreshold, edgeChars) {
+            let asciiChars = (charset === 'custom') ? resolveCharset('custom') : charsets[charset];
+            if (!asciiChars) asciiChars = charsets.standard;
+
+            if (isInverted) {
+                asciiChars = asciiChars.split("").reverse().join("");
+            }
+
+            if (!img) return "";
+
+            const width = targetWidth;
+            const scale = width / (img.naturalWidth || img.videoWidth || img.width);
+            const height = Math.floor((img.naturalHeight || img.videoHeight || img.height) * scale * 0.55);
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const imgD = ctx.getImageData(0, 0, width, height);
+
+            // Build grayscale array for Sobel
+            const gray = new Float32Array(width * height);
+            for (let i = 0; i < width * height; i++) {
+                gray[i] = calculate_luminance(
+                    imgD.data[i * 4],
+                    imgD.data[i * 4 + 1],
+                    imgD.data[i * 4 + 2]
+                );
+            }
+
+            // Compute Sobel gradients
+            const { gx, gy } = computeSobel(gray, width, height);
+
+            let ascci = "";
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const idx = y * width + x;
+                    const r = imgD.data[idx * 4];
+                    const g = imgD.data[idx * 4 + 1];
+                    const b = imgD.data[idx * 4 + 2];
+
+                    let char;
+                    if (useEdge) {
+                        const magnitude = Math.sqrt(gx[idx] * gx[idx] + gy[idx] * gy[idx]);
+                        if (magnitude > edgeThreshold) {
+                            char = getEdgeChar(gx[idx], gy[idx], edgeChars);
+                        } else {
+                            // Below threshold: use luminance-based character
+                            const luminance = gray[idx];
+                            const charIndex = Math.floor((luminance / 255) * (asciiChars.length - 1));
+                            char = asciiChars.charAt(charIndex);
+                        }
+                    } else {
+                        const luminance = gray[idx];
+                        const charIndex = Math.floor((luminance / 255) * (asciiChars.length - 1));
+                        char = asciiChars.charAt(charIndex);
+                    }
+
+                    if (isColor) {
+                        ascci += `<span style="color:rgb(${r},${g},${b});">${char}</span>`;
+                    } else {
+                        ascci += char;
+                    }
+                }
+                ascci += '\n';
+            }
+
+            return ascci;
+        }
+
+        function getParams() {
+            return {
+                width: parseInt(widthInput.value),
+                isColor: colorCheckbox.checked,
+                isInverted: invertCheckbox.checked,
+                charset: charsetSelect.value,
+                useEdge: edgeDetectCheckbox.checked,
+                edgeThreshold: parseInt(edgeThresholdInput.value),
+                edgeChars: edgeCharsInput.value || '|-/\\'
+            };
+        }
+
+        const updateASCII = () => {
+            if (originalImage) {
+                const p = getParams();
+                const out = generateASCII(
+                    originalImage, p.width, p.isColor, p.isInverted,
+                    p.charset, p.useEdge, p.edgeThreshold, p.edgeChars
+                );
+                preOut.innerHTML = out;
+                widthValue.textContent = p.width;
+            }
+        };
+
+        function processVideoFrame() {
+            if (liveMode && video.videoWidth > 0) {
+                const p = getParams();
+                const out = generateASCII(
+                    video, p.width, p.isColor, p.isInverted,
+                    p.charset, p.useEdge, p.edgeThreshold, p.edgeChars
+                );
+                preOut.innerHTML = out;
+                widthValue.textContent = p.width;
+                animationId = requestAnimationFrame(processVideoFrame);
+            }
+        }
+
+        // Control event listeners
+        widthInput.addEventListener('input', () => { widthValue.textContent = widthInput.value; if (!liveMode) updateASCII(); });
+        colorCheckbox.addEventListener('change', () => { if (!liveMode) updateASCII(); });
+        invertCheckbox.addEventListener('change', () => { if (!liveMode) updateASCII(); });
+        charsetSelect.addEventListener('change', () => {
+            if (charsetSelect.value === 'custom') ensureCustomInput();
+            else hideCustomInput();
+            if (!liveMode) updateASCII();
+        });
+
+        edgeDetectCheckbox.addEventListener('change', () => { if (!liveMode) updateASCII(); });
+        edgeThresholdInput.addEventListener('input', () => {
+            edgeThresholdValue.textContent = edgeThresholdInput.value;
+            if (!liveMode) updateASCII();
+        });
+        edgeCharsInput.addEventListener('input', () => { if (!liveMode) updateASCII(); });
+
+        fileInput.addEventListener('change', (e) => {
+            e.preventDefault();
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const img = document.createElement('img');
+                    img.src = ev.target.result;
+                    img.onload = () => {
+                        originalImage = img;
+                        imgPreview.innerHTML = '';
+                        img.style.maxWidth = '80px';
+                        imgPreview.appendChild(img);
+                        if (liveMode) { liveModeCheckbox.checked = false; stopLiveMode(); }
+                        updateASCII();
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        startCameraBtn.addEventListener('click', async () => {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                video.srcObject = stream;
+                video.style.display = 'block';
+                startCameraBtn.disabled = true;
+                stopCameraBtn.disabled = false;
+                captureBtn.disabled = false;
+                liveModeCheckbox.disabled = false;
+            } catch (err) {
+                alert('Error accessing camera: ' + err.message);
+            }
+        });
+
+        stopCameraBtn.addEventListener('click', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+                video.style.display = 'none';
+                startCameraBtn.disabled = false;
+                stopCameraBtn.disabled = true;
+                captureBtn.disabled = true;
+                liveModeCheckbox.disabled = true;
+                if (liveMode) { liveModeCheckbox.checked = false; stopLiveMode(); }
+            }
+        });
+
+        captureBtn.addEventListener('click', () => {
+            if (video.videoWidth > 0) {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+                const img = new Image();
+                img.src = canvas.toDataURL();
+                img.onload = () => {
+                    originalImage = img;
+                    imgPreview.innerHTML = '';
+                    img.style.maxWidth = '80px';
+                    imgPreview.appendChild(img);
+                    if (liveMode) { liveModeCheckbox.checked = false; stopLiveMode(); }
+                    updateASCII();
+                };
+            }
+        });
+
+        liveModeCheckbox.addEventListener('change', () => {
+            if (liveModeCheckbox.checked) startLiveMode();
+            else stopLiveMode();
+        });
+
+        function startLiveMode() {
+            if (video.videoWidth > 0) {
+                liveMode = true;
+                liveIndicator.style.display = 'inline-block';
+                processVideoFrame();
+            } else {
+                liveModeCheckbox.checked = false;
+                alert('Please start the camera first!');
+            }
+        }
+
+        function stopLiveMode() {
+            liveMode = false;
+            liveIndicator.style.display = 'none';
+            if (animationId) { cancelAnimationFrame(animationId); animationId = null; }
+        }
+
+        updateASCII();
+    </script>
+</body>
+
+</html>
