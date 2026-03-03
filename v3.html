@@ -317,7 +317,7 @@
                     if (isColor) {
                         ascci += `<span style="color:rgb(${r},${g},${b});">${char}</span>`;
                     } else {
-                        ascci += char;
+                        ascci += `<span style="color:rgb(${255},${255},${255});">${char}</span>`;
                     }
                 }
                 ascci += '\n';
