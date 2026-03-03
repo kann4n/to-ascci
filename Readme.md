@@ -2,7 +2,7 @@
 
 
 ## Demo
-live demo: [https://kann4n.github.io/to-ascci/](https://kann4n.github.io/to-ascci/)
+Live demo: [https://kann4n.github.io/to-ascci/](https://kann4n.github.io/to-ascci/)
 ### images 
 * ![v1](/assets/versions/v1.png)
 * ![v2](/assets/versions/v2.png)
