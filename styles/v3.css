@@ -1,0 +1,40 @@
+/* v3-specific styles for edge-section and related controls */
+.edge-section {
+    border: 1px solid #aad4ff;
+    background: #f0f8ff;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.edge-section .section-title {
+    grid-column: 1 / -1;
+    font-weight: bold;
+    font-size: 1rem;
+    color: #2277bb;
+    margin-bottom: 5px;
+}
+
+.edge-section .control-group label {
+    color: #2277bb;
+}
+
+.edge-section input[type="range"] {
+    accent-color: #2277bb;
+}
+
+.edge-section input[type="text"] {
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 1.1em;
+    width: 100%;
+}
+
+.edge-section small {
+    color: #777;
+}
